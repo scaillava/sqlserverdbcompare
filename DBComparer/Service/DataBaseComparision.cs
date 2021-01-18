@@ -31,7 +31,7 @@ namespace DBComparer.Service
                 con.Open();
                 sql.Connection = con;
                 sql.CommandType = CommandType.Text;
-                sql.CommandText = "SELECT ROUTINE_DEFINITION, SPECIFIC_NAME FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_TYPE = 'PROCEDURE'";
+                sql.CommandText = "SELECT Object_name(object_id) as SPECIFIC_NAME ,definition as ROUTINE_DEFINITION  FROM sys.sql_modules";
                 da.SelectCommand = sql;
 
                 da.Fill(dt);
