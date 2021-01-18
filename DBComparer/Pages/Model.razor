@@ -1,0 +1,4 @@
+﻿@page "/model"
+@inject DBComparer.Model.DataBaseComparer dbcomparer;
+<ListComparer tab="Tables" listA="@dbcomparer.databaseA.tables" listB="@dbcomparer.databaseB.tables" />
+

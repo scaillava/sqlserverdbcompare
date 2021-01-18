@@ -1,0 +1,29 @@
+﻿@if (comparerField == null || receivedA == null || receivedB == null)
+{
+    <p><em>Select one to compare</em></p>
+}
+else
+{
+    <h3>@comparerField difference</h3>
+    <table class="table" style="white-space: pre-line">
+        <tbody>
+            <tr>
+                <td>@((MarkupString)receivedA)</td>
+                <td>@((MarkupString)receivedB)</td>
+            </tr>
+
+        </tbody>
+    </table>
+}
+@code {
+    [Parameter]
+    public string comparerField { get; set; }
+    [Parameter]
+    public string receivedA { get; set; }
+    [Parameter]
+    public string receivedB { get; set; }
+
+}
+
+
+

@@ -1,0 +1,71 @@
+﻿@if (comparerField == null || receivedA == null || receivedB == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+
+}<h3>Comparer @comparerField</h3>
+<table class="table">
+    <tbody>
+        <tr>
+            <td>@resultA</td>
+            <td>@resultB</td>
+        </tr>
+
+    </tbody>
+</table>
+@code {
+    [Parameter]
+    public string comparerField { get; set; }
+    [Parameter]
+    public string receivedA { get; set; }
+    [Parameter]
+    public string receivedB { get; set; }
+    public string resultA { get; set; }
+    public string resultB { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Compare();
+    }
+
+    public async Task Compare()
+    {
+        await Task.Run(async () =>
+        {
+            DiffMatchPatch.diff_match_patch diff_Match_Patch = new DiffMatchPatch.diff_match_patch();
+            var diff = diff_Match_Patch.diff_main(receivedA, receivedB);
+            foreach (var dif in diff)
+            {
+                if (dif.operation == DiffMatchPatch.Operation.DELETE)
+                {
+                    resultA += "<span style=\"color:red\">" + dif.text + "</span>";
+
+                }
+                else if (dif.operation == DiffMatchPatch.Operation.EQUAL)
+                {
+                    resultA += dif.text;
+                    resultB += dif.text;
+                }
+                else if (dif.operation == DiffMatchPatch.Operation.INSERT)
+                {
+                    resultB += "<span style=\"color:green\">" + dif.text + "</span>";
+                }
+            }
+
+        });
+    }
+
+
+
+
+
+
+
+
+
+}
+
+
+

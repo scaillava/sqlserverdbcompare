@@ -1,0 +1,54 @@
+﻿@page "/ccrud"
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq;
+
+@inject IWritableOptions<List<Connection>> _writableConnections;
+<h1>Connections Config</h1>
+<button type="button" class="btn btn-outline-primary" @onclick="Add">Create</button>
+<br />
+<br />
+@if (connections != null)
+    @foreach (Connection connection in connections)
+    {
+        <ConnectionComp connection="@connection" OnDelete="()=>Delete(connection)"></ConnectionComp>
+
+    }
+
+
+
+
+<button type="button" class="btn btn-outline-success" @onclick="Save">Save</button>
+@code {
+    List<DBComparer.Model.Connection> connections;
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(async () =>
+        {
+            if (_writableConnections.Value != null)
+            {
+                connections = _writableConnections.Value;//JArray.Parse(connectionStr).ToObject<List<DBComparer.Model.Connection>>();
+        }
+            else
+            {
+                connections = new List<Connection>();
+            }
+
+        });
+    }
+
+    void Delete(Connection connection)
+    {
+        connections.Remove(connection);
+    }
+
+    void Save()
+    {
+        //_writableConnections.Update(x => x);
+        _writableConnections.Update(x => x = connections);
+
+    }
+    void Add()
+    {
+        connections.Add(new Connection());
+    }
+}

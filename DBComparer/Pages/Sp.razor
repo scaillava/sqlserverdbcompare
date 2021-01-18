@@ -1,0 +1,4 @@
+﻿@page "/sp"
+@inject DBComparer.Model.DataBaseComparer dbcomparer;
+<ListComparer tab="Stored Procedures" listA="@dbcomparer.databaseA.storedProcedures" listB="@dbcomparer.databaseB.storedProcedures" />
+

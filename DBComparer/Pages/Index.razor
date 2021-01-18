@@ -1,0 +1,82 @@
+﻿@page "/"
+@using DBComparer.Service;
+@inject IWritableOptions<List<Connection>> _writableConnections;
+@inject DBComparer.Model.DataBaseComparer dbcomparer;
+@inject NavigationManager NavManager;
+
+<h1>Select databases to compare</h1>
+@if (connections != null)
+{
+    <div class="row align-items-center" style="margin-top:5%; width:50%">
+        <div class="col-sm">
+            <Dropdown TItem="Connection" OnSelected="@((Connection connection) => dbcomparer.databaseA.connection = connection)">
+                <InitialTip>Select Database</InitialTip>
+                <ChildContent>
+                    @foreach (Connection connection in connections)
+                    {
+                        <DropdownListItem Item="@connection">@connection.name</DropdownListItem>
+                    }
+                </ChildContent>
+            </Dropdown>
+        </div>
+        <div class="col-sm">
+
+            <Dropdown TItem="Connection" OnSelected="@((Connection connection) => dbcomparer.databaseB.connection = connection)">
+                <InitialTip>Select Database</InitialTip>
+                <ChildContent>
+                    @foreach (Connection connection in connections)
+                    {
+                        <DropdownListItem Item="@connection">@connection.name</DropdownListItem>
+                    }
+                </ChildContent>
+            </Dropdown>
+        </div>
+    </div>
+
+
+}
+
+
+@if (dbcomparer.databaseA.connection != null && dbcomparer.databaseB.connection != null)
+{
+    <button class="btn btn-primary" style="margin-top:5%; font-size:large" @onclick="() =>Compare()">Compare</button>
+}
+
+
+
+
+@code{
+
+    List<DBComparer.Model.Connection> connections;
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(async () =>
+        {
+            if (_writableConnections.Value != null)
+            {
+                connections = _writableConnections.Value;//JArray.Parse(connectionStr).ToObject<List<DBComparer.Model.Connection>>();
+            }
+            else
+            {
+                connections = new List<Connection>();
+            }
+
+        });
+    }
+    public async void Compare()
+    {
+        var spATask = DataBaseComparision.GetStoredProcedures(dbcomparer.databaseA.connection.connection);
+        var spBTask = DataBaseComparision.GetStoredProcedures(dbcomparer.databaseB.connection.connection);
+        var tAtask = DataBaseComparision.GetModel(dbcomparer.databaseA.connection.connection);
+        var tBTask = DataBaseComparision.GetModel(dbcomparer.databaseB.connection.connection);
+        await Task.WhenAll(spATask, spBTask, tAtask, tBTask);
+        dbcomparer.databaseA.storedProcedures = spATask.Result;
+        dbcomparer.databaseB.storedProcedures = spBTask.Result;
+        dbcomparer.databaseA.tables = tAtask.Result;
+        dbcomparer.databaseB.tables = tBTask.Result;
+        NavManager.NavigateTo("/sp", true);
+    }
+}
+
+
+@*<SurveyPrompt Title="How is Blazor working for you?" />*@

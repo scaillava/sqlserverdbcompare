@@ -1,0 +1,125 @@
+﻿
+
+@inject DBComparer.Model.DataBaseComparer dbcomparer;
+<h1>@tab</h1>
+
+
+@if (dbcomparer.databaseA == null || dbcomparer.databaseB == null || kVDifferents == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h2>Missing @tab</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">From @dbcomparer.databaseA.connection.name to @dbcomparer.databaseB.connection.name</th>
+                <th scope="col">From @dbcomparer.databaseB.connection.name to @dbcomparer.databaseA.connection.name</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @for (int i = 0; i < (missingFromA.Count > missingFromB.Count ? missingFromA.Count : missingFromB.Count); i++)
+            {
+                <tr>
+                    <td>@(i < missingFromA.Count? missingFromA[i]:"")</td>
+                    <td>@(i < missingFromB.Count? missingFromB[i]:"")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h2>@tab differents</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">From @dbcomparer.databaseA.connection.name to @dbcomparer.databaseB.connection.name</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sp in kVDifferents)
+            {
+                <tr>
+                    <td>@sp.field</td>
+                    <td><button type="button" class="btn btn-primary" @onclick="@(()=>selectCompare(@sp))">Compare</button></td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+
+    <Compare comparerField="@selectedField" receivedA="@comparerA" receivedB="@comparerB" />
+
+}
+
+@code {
+
+    [Parameter]
+    public string tab { get; set; }
+    [Parameter]
+    public List<DBComparer.Model.KeyValue> listA { get; set; }
+    [Parameter]
+    public List<DBComparer.Model.KeyValue> listB { get; set; }
+    private List<string> missingFromA, missingFromB;
+    private string selectedField, comparerA, comparerB;
+    private List<StringCompare> kVDifferents;
+
+    void selectCompare(StringCompare stringCompare)
+    {
+        selectedField = stringCompare.field;
+        comparerA = stringCompare.difA;
+        comparerB = stringCompare.difB;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Run(async () =>
+        {
+            missingFromA = listA.Select(x => x.name).ToList().Except(listB.Select(x => x.name).ToList()).ToList();
+            missingFromB = listB.Select(x => x.name).ToList().Except(listA.Select(x => x.name).ToList()).ToList();
+
+            kVDifferents = new List<StringCompare>();
+            List<string> spInBoth = listA.Select(x => x.name).ToList().Intersect(listB.Select(x => x.name).ToList()).ToList();
+            DiffMatchPatch.diff_match_patch diff_Match_Patch = new DiffMatchPatch.diff_match_patch();
+            foreach (string name in spInBoth)
+            {
+
+                string kvA = listA.Find(x => x.name == name).definition.Replace("\r", "");
+                string kvB = listB.Find(x => x.name == name).definition.Replace("\r", "");
+                if (kvA != kvB)
+                {
+
+                    StringCompare compare = new StringCompare();
+                    compare.field = name;
+
+                    var diff = diff_Match_Patch.diff_main(kvA, kvB);
+                    foreach (var dif in diff)
+                    {
+                        if (dif.operation == DiffMatchPatch.Operation.DELETE)
+                        {
+                            compare.difA += "<span style=\"color:red\">" + dif.text + "</span>";
+
+                        }
+                        else if (dif.operation == DiffMatchPatch.Operation.EQUAL)
+                        {
+                            compare.difA += "<span>" + dif.text + "</span>";
+                            compare.difB += "<span>" + dif.text + "</span>";
+                        }
+                        else if (dif.operation == DiffMatchPatch.Operation.INSERT)
+                        {
+                            compare.difB += "<span style=\"color:green\">" + dif.text + "</span>";
+                        }
+
+                    }
+                    kVDifferents.Add(compare);
+                }
+            }
+
+        });
+    }
+
+
+
+}
