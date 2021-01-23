@@ -1,6 +1,6 @@
 # sqlserverdbcompare
 - Small Blazor Project that compares MSSQL Server Databases using google diff algorithm.
-- It also has electro framework so you can create a cross platfrom desktop app with it.
+- It also has electron.net framework so you can create a cross platfrom desktop app with it.
 - It has 2 comparsions at the moment but its easy to add more.
 <br/>
 
