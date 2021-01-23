@@ -6,6 +6,12 @@ else
 {
     <h3>@comparerField difference</h3>
     <table class="table" style="white-space: pre-line">
+        <thead>
+            <tr>
+                <th scope="col">@dbNameA</th>
+                <th scope="col">@dbNameB</th>
+            </tr>
+        </thead>
         <tbody>
             <tr>
                 <td>@((MarkupString)receivedA)</td>
@@ -22,6 +28,10 @@ else
     public string receivedA { get; set; }
     [Parameter]
     public string receivedB { get; set; }
+    [Parameter]
+    public string dbNameA { get; set; }
+    [Parameter]
+    public string dbNameB { get; set; }
 
 }
 

@@ -14,8 +14,8 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th scope="col">From @dbcomparer.databaseA.connection.name to @dbcomparer.databaseB.connection.name</th>
-                <th scope="col">From @dbcomparer.databaseB.connection.name to @dbcomparer.databaseA.connection.name</th>
+                <th scope="col">From @dbcomparer.databaseA.connection.name</th>
+                <th scope="col">From @dbcomparer.databaseB.connection.name</th>
             </tr>
         </thead>
 
@@ -23,8 +23,8 @@ else
             @for (int i = 0; i < (missingFromA.Count > missingFromB.Count ? missingFromA.Count : missingFromB.Count); i++)
             {
                 <tr>
-                    <td>@(i < missingFromA.Count? missingFromA[i]:"")</td>
                     <td>@(i < missingFromB.Count? missingFromB[i]:"")</td>
+                    <td>@(i < missingFromA.Count? missingFromA[i]:"")</td>
                 </tr>
             }
         </tbody>
@@ -32,12 +32,12 @@ else
 
     <h2>@tab differents</h2>
     <table class="table">
-        <thead>
+        @*<thead>
             <tr>
                 <th scope="col">From @dbcomparer.databaseA.connection.name to @dbcomparer.databaseB.connection.name</th>
                 <th scope="col"></th>
             </tr>
-        </thead>
+        </thead>*@
         <tbody>
             @foreach (var sp in kVDifferents)
             {
@@ -50,7 +50,7 @@ else
         </tbody>
     </table>
 
-    <Compare comparerField="@selectedField" receivedA="@comparerA" receivedB="@comparerB" />
+    <Compare comparerField="@selectedField" dbNameA="@dbcomparer.databaseA.connection.name" dbNameB="@dbcomparer.databaseB.connection.name" receivedA="@comparerA" receivedB="@comparerB" />
 
 }
 
@@ -88,7 +88,9 @@ else
 
                 string kvA = listA.Find(x => x.name == name).definition.Replace("\r", "");
                 string kvB = listB.Find(x => x.name == name).definition.Replace("\r", "");
-                if (kvA != kvB)
+                string kvCompareA = kvA.Replace("\n", "");
+                string kvCompareB = kvB.Replace("\n", "");
+                if (kvCompareA != kvCompareB)
                 {
 
                     StringCompare compare = new StringCompare();
